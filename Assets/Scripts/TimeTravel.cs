@@ -65,7 +65,7 @@ public class TimeTravel : MonoBehaviour
         {
             respawnPoint.position = transform.position;
         }
-        
+        Debug.Log(transform.position);
         Debug.Log("Zaman klonu oluşturuldu!");
     }
     
@@ -76,11 +76,8 @@ public class TimeTravel : MonoBehaviour
         {
             Destroy(activeClone);
             activeClone = null;
-            // Klon yok edildiğinde başlangıç pozisyonuna dön
-            if (respawnPoint != null)
-            {
-                respawnPoint.position = initialRespawnPosition;
-            }
+
+            respawnPoint.position = initialRespawnPosition;
         }
     }
 }

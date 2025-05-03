@@ -29,13 +29,12 @@ public class PlayerRespawnHandler : MonoBehaviour
         }
     }
 
-    private IEnumerator RespawnWithFade()
+    public IEnumerator RespawnWithFade()
     {
         // Hareketi kapat
         if (playerMovement != null)
             playerMovement.enabled = false;
 
-        
         // Ekran tamamen karanlık olduğundan emin olmak için
         Color c = screenFader.color;
         c.a = 1f;
@@ -43,6 +42,12 @@ public class PlayerRespawnHandler : MonoBehaviour
         
         // Karanlıkta bir süre bekle
         yield return new WaitForSeconds(0.1f);
+
+        // Her respawn sırasında güncel respawn noktasını alalım
+        if (playerMovement != null)
+        {
+            respawnPoint = playerMovement.respawnPoint;
+        }
 
         // Karanlıktayken oyuncuyu ışınla
         transform.position = respawnPoint.position;
