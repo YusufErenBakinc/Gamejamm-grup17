@@ -13,8 +13,14 @@ public class playerMovement : MonoBehaviour
 
     bool grounded;
 
+    private Animator anim;
+
+    private bool isFacingRight;
+
     private void Start()
     {
+        isFacingRight = true;
+        anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
     }
 
@@ -28,6 +34,35 @@ public class playerMovement : MonoBehaviour
         {
             rb.AddForce(new Vector2(rb.velocity.x, jump*10));
         }
+
+        if(Move !=0) 
+        {
+            anim.SetBool("isRunning", true);
+        }
+        else
+        {
+            anim.SetBool("isRunning",false);
+        }
+
+        anim.SetBool("isJumping", !grounded);
+
+        if (!isFacingRight && Move > 0)
+        {
+            Flip();
+
+        }
+        else if (isFacingRight && Move < 0)
+        {
+            Flip();
+        }
+    }
+
+    public void Flip()
+    {
+        isFacingRight = !isFacingRight;
+        Vector3 localScale = transform.localScale;
+        localScale.x *= -1f;
+        transform.localScale = localScale;
     }
 
     private void OnCollisionEnter2D(Collision2D other)
