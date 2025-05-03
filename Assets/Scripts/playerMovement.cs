@@ -17,6 +17,7 @@ public class playerMovement : MonoBehaviour
 
     private bool isFacingRight;
 
+    public Transform respawnPoint; // Respawn iÃ§in hedef nokta
     private void Start()
     {
         isFacingRight = true;
@@ -71,7 +72,7 @@ public class playerMovement : MonoBehaviour
         {
             Vector3 normal = other.GetContact(0).normal;
 
-            // Eðer normal yukarýya yakýnsa (örn. en az %90 yukarý bakýyorsa)
+            // Eï¿½er normal yukarï¿½ya yakï¿½nsa (ï¿½rn. en az %90 yukarï¿½ bakï¿½yorsa)
             if (Vector3.Angle(normal, Vector3.up) < 45f)
             {
                 grounded = true;
@@ -85,6 +86,15 @@ public class playerMovement : MonoBehaviour
         if (other.gameObject.CompareTag("Ground"))
         {
             grounded = false;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Hazard"))
+        {
+            transform.position = respawnPoint.position;
+            rb.velocity = Vector2.zero; // HÄ±z sÄ±fÄ±rlama (opsiyonel)
         }
     }
 }
