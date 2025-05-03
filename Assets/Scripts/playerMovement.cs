@@ -23,6 +23,8 @@ public class playerMovement : MonoBehaviour
         isFacingRight = true;
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+        respawnPoint = new GameObject("RespawnPoint").transform;
+        respawnPoint.position = new Vector3(-5.57f, 1.35f, 0f);
     }
 
     private void Update()
