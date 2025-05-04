@@ -10,6 +10,9 @@ public class playerMovement : MonoBehaviour
 
     public float speed;
     public float jump;
+    private bool hasDoubleJumped = false;
+    private TimeTravel timeTravel; // TimeTravel referansı
+
 
     bool grounded;
 
@@ -25,6 +28,9 @@ public class playerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         respawnPoint = new GameObject("RespawnPoint").transform;
         respawnPoint.position = new Vector3(-5.57f, 1.35f, 0f);
+
+        timeTravel = GetComponent<TimeTravel>();
+
     }
 
     private void Update()
@@ -32,13 +38,25 @@ public class playerMovement : MonoBehaviour
         Move = Input.GetAxisRaw("Horizontal");
         
         rb.velocity = new Vector2(Move * speed, rb.velocity.y);
-        
-        if (Input.GetButtonDown("Jump") && grounded)
+
+        if (Input.GetButtonDown("Jump"))
         {
-            rb.AddForce(new Vector2(rb.velocity.x, jump*10));
+            if (grounded)
+            {
+                rb.AddForce(new Vector2(rb.velocity.x, jump * 10));
+                hasDoubleJumped = false; // Yere basınca sıfırla
+            }
+            else if (!hasDoubleJumped && timeTravel != null && timeTravel.IsCloneActive())
+            {
+                rb.velocity = new Vector2(rb.velocity.x, 0); // Eski zıplamayı sıfırla
+                rb.AddForce(new Vector2(rb.velocity.x, jump * 10));
+                anim.SetTrigger("doubleJump");
+                hasDoubleJumped = true; // Double jump kullanıldı
+            }
         }
 
-        if(Move !=0) 
+
+        if (Move !=0) 
         {
             anim.SetBool("isRunning", true);
         }

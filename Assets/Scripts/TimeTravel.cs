@@ -114,15 +114,15 @@ public class TimeTravel : MonoBehaviour
     public GameObject clonePrefab; // Klon prefabı
     public Transform respawnPoint; // Respawn noktası referansı
     public float replaySpeed = 2.0f; // Klonun kayıtlı hareketleri ne kadar hızlı tekrarlayacağı
-    
+
     [Header("Afterimage Settings")]
     public float afterimageInterval = 0.5f; // Görüntü izlerinin oluşma sıklığı (saniye)
     public float afterimageAlpha = 0.4f; // Görüntü izlerinin transparanlığı
-    
+
     private GameObject activeClone; // Aktif olan klon
     private playerMovement playerMovement; // Oyuncu hareketi referansı
     private Vector3 initialRespawnPosition; // Başlangıç respawn pozisyonu
-    
+
     // Önceki pozisyon listesi yerine şimdi frame listesi kullanacağız
     private List<PlayerFrame> recordedFrames = new List<PlayerFrame>();
     private List<GameObject> afterimages = new List<GameObject>(); // Oluşturulan görüntü izleri
@@ -131,12 +131,15 @@ public class TimeTravel : MonoBehaviour
     private float lastRecordTime = 0f;
     private float lastAfterimageTime = 0f; // Son görüntü izinin oluşturulma zamanı
     private Vector3 finalPosition; // E'ye ikinci kez basıldığındaki konum
-    
+
+    private Vector3 recordedStartPosition;
+
+
     private void Start()
     {
         // Komponentleri al
         playerMovement = GetComponent<playerMovement>();
-        
+
         // respawnPoint referansını playerMovement'tan al
         if (playerMovement != null)
         {
@@ -144,7 +147,7 @@ public class TimeTravel : MonoBehaviour
             initialRespawnPosition = respawnPoint.position;
         }
     }
-    
+
     private void Update()
     {
         // E tuşuna basıldığında
@@ -161,19 +164,19 @@ public class TimeTravel : MonoBehaviour
                 StopRecordingAndPlayback();
             }
         }
-        
+
         // Kayıt modundayken belirli aralıklarla pozisyonu kaydet
         if (isRecording && Time.time - lastRecordTime > recordInterval)
         {
             // Oyuncunun yönünü belirle (SpriteRenderer.flipX kullanarak)
             SpriteRenderer playerRenderer = GetComponent<SpriteRenderer>();
             bool isFacingRight = (playerRenderer != null) ? !playerRenderer.flipX : true;
-            
+
             // Pozisyon ve yönü kaydet
             recordedFrames.Add(new PlayerFrame(transform.position, isFacingRight));
             lastRecordTime = Time.time;
         }
-        
+
         // Kayıt modundayken belirli aralıklarla görüntü izi oluştur
         if (isRecording && Time.time - lastAfterimageTime > afterimageInterval)
         {
@@ -181,7 +184,7 @@ public class TimeTravel : MonoBehaviour
             lastAfterimageTime = Time.time;
         }
     }
-    
+
     // Kayda başla ve klonu oluştur
     private void StartRecording()
     {
@@ -191,7 +194,9 @@ public class TimeTravel : MonoBehaviour
         isRecording = true;
         lastRecordTime = Time.time;
         lastAfterimageTime = Time.time;
-        
+        recordedStartPosition = transform.position;
+
+
         if (purpleFilterPanel != null)
         {
             purpleFilterPanel.SetActive(true);
@@ -199,22 +204,22 @@ public class TimeTravel : MonoBehaviour
 
         // Klonu oluştur
         activeClone = Instantiate(clonePrefab, transform.position, transform.rotation);
-        
+
         // Klonun görünüşünü ayarla
         SpriteRenderer cloneRenderer = activeClone.GetComponent<SpriteRenderer>();
         SpriteRenderer playerRenderer = GetComponent<SpriteRenderer>();
-        
+
         if (cloneRenderer != null && playerRenderer != null)
         {
             cloneRenderer.sprite = playerRenderer.sprite;
             cloneRenderer.flipX = playerRenderer.flipX;
-            
+
             // Yarı saydam yap
             Color cloneColor = cloneRenderer.color;
             cloneColor.a = 0.7f; // Alpha değerini ayarla
             cloneRenderer.color = cloneColor;
         }
-        
+
         // Respawn noktasını güncelle
         if (respawnPoint != null)
         {
@@ -223,39 +228,39 @@ public class TimeTravel : MonoBehaviour
         Time.timeScale = 0.5f;
         Debug.Log("Zaman klonu oluşturuldu ve kayıt başladı!");
     }
-    
+
     // Kayıt sırasında görüntü izi oluştur
     private void CreateAfterimage()
-{
-    // Oyuncunun şu anki pozisyonunda bir görüntü izi oluştur
-    GameObject afterimage = Instantiate(clonePrefab, transform.position, transform.rotation);
-    afterimages.Add(afterimage);
-    
-    // Görüntü izinin görünüşünü ayarla
-    SpriteRenderer afterimageRenderer = afterimage.GetComponent<SpriteRenderer>();
-    SpriteRenderer playerRenderer = GetComponent<SpriteRenderer>();
-    
-    if (afterimageRenderer != null && playerRenderer != null)
     {
-        afterimageRenderer.sprite = playerRenderer.sprite;
-        
-        // Yön bilgisini kopyala
-        afterimageRenderer.flipX = playerRenderer.flipX;
-        
-        // Daha saydam yap
-        Color afterimageColor = afterimageRenderer.color;
-        afterimageColor.a = afterimageAlpha;
-        afterimageRenderer.color = afterimageColor;
+        // Oyuncunun şu anki pozisyonunda bir görüntü izi oluştur
+        GameObject afterimage = Instantiate(clonePrefab, transform.position, transform.rotation);
+        afterimages.Add(afterimage);
+
+        // Görüntü izinin görünüşünü ayarla
+        SpriteRenderer afterimageRenderer = afterimage.GetComponent<SpriteRenderer>();
+        SpriteRenderer playerRenderer = GetComponent<SpriteRenderer>();
+
+        if (afterimageRenderer != null && playerRenderer != null)
+        {
+            afterimageRenderer.sprite = playerRenderer.sprite;
+
+            // Yön bilgisini kopyala
+            afterimageRenderer.flipX = playerRenderer.flipX;
+
+            // Daha saydam yap
+            Color afterimageColor = afterimageRenderer.color;
+            afterimageColor.a = afterimageAlpha;
+            afterimageRenderer.color = afterimageColor;
+        }
+
+        // Collider'ları devre dışı bırak (varsa)
+        Collider2D collider = afterimage.GetComponent<Collider2D>();
+        if (collider != null)
+        {
+            collider.enabled = false;
+        }
     }
-    
-    // Collider'ları devre dışı bırak (varsa)
-    Collider2D collider = afterimage.GetComponent<Collider2D>();
-    if (collider != null)
-    {
-        collider.enabled = false;
-    }
-}
-    
+
     // Tüm görüntü izlerini temizle
     private void ClearAfterimages()
     {
@@ -268,120 +273,123 @@ public class TimeTravel : MonoBehaviour
         }
         afterimages.Clear();
     }
-    
+
     // Kaydı durdur ve klona hareketleri oynat
     private void StopRecordingAndPlayback()
     {
         // Kaydı durdur
         isRecording = false;
         finalPosition = transform.position;
-        
+        transform.position = recordedStartPosition;
+
+
         // Zamanı tamamen durdur
         Time.timeScale = 0f;
-        
+
         // Oyuncunun hareketini devre dışı bırak
         if (playerMovement != null)
         {
             playerMovement.enabled = false;
         }
-        
+
         // Klona kayıtlı hareketleri oynat
         StartCoroutine(PlaybackRecordedMovements());
     }
-    
+
     // Kayıtlı hareketleri hızlı bir şekilde oynat ve görüntü izlerini sil
-private IEnumerator PlaybackRecordedMovements()
-{
-    if (activeClone != null && recordedFrames.Count > 0)
+    private IEnumerator PlaybackRecordedMovements()
     {
-        // Hızlı oynatma için bekleme süresini hesapla
-        float waitTime = recordInterval / replaySpeed;
-        
-        // Klonun SpriteRenderer bileşenini al
-        SpriteRenderer cloneRenderer = activeClone.GetComponent<SpriteRenderer>();
-        
-        // Tüm kayıtlı pozisyonları ve yönleri sırayla uygula
-        for (int i = 0; i < recordedFrames.Count; i++)
+        if (activeClone != null && recordedFrames.Count > 0)
         {
+            // Hızlı oynatma için bekleme süresini hesapla
+            float waitTime = recordInterval / replaySpeed;
+
+            // Klonun SpriteRenderer bileşenini al
+            SpriteRenderer cloneRenderer = activeClone.GetComponent<SpriteRenderer>();
+
+            // Tüm kayıtlı pozisyonları ve yönleri sırayla uygula
+            for (int i = 0; i < recordedFrames.Count; i++)
+            {
+                if (activeClone != null)
+                {
+                    // Pozisyonu güncelle
+                    activeClone.transform.position = recordedFrames[i].position;
+
+                    // Yönü güncelle (facingRight true ise flipX false olmalı)
+                    if (cloneRenderer != null)
+                    {
+                        cloneRenderer.flipX = !recordedFrames[i].facingRight;
+                    }
+
+                    // Eğer klon bir görüntü iziyle yeterince yakınsa, o izi yok et
+                    CheckAndDestroyAfterimages();
+
+                    yield return new WaitForSecondsRealtime(waitTime);
+                }
+                else
+                {
+                    // Klon yok edilmiş
+                    RestoreTimeAndPlayerControl();
+                    ClearAfterimages();
+                    yield break;
+                }
+            }
+
+            // Son konuma git ve klonu yok et
             if (activeClone != null)
             {
-                // Pozisyonu güncelle
-                activeClone.transform.position = recordedFrames[i].position;
-                
-                // Yönü güncelle (facingRight true ise flipX false olmalı)
+                // Klonu başlangıç pozisyonuna ışınla (veya istersen hareket ettir)
+                PlayerFrame firstFrame = recordedFrames[0];
+                activeClone.transform.position = firstFrame.position;
+
                 if (cloneRenderer != null)
                 {
-                    cloneRenderer.flipX = !recordedFrames[i].facingRight;
+                    cloneRenderer.flipX = !firstFrame.facingRight;
                 }
-                
-                // Eğer klon bir görüntü iziyle yeterince yakınsa, o izi yok et
-                CheckAndDestroyAfterimages();
-                
-                yield return new WaitForSecondsRealtime(waitTime);
-            }
-            else
-            {
-                // Klon yok edilmiş
-                RestoreTimeAndPlayerControl();
+
+
+                // Son kalan görüntü izlerini temizle
                 ClearAfterimages();
-                yield break;
+
+                yield return new WaitForSecondsRealtime(0.2f);
+
+                Destroy(activeClone);
+                activeClone = null;
+                Debug.Log("Klon hareketleri tamamladı ve yok edildi!");
+
+                // İşlem tamamlandı, zamanı ve oyuncu kontrolünü geri yükle
+                RestoreTimeAndPlayerControl();
             }
         }
-        
-        // Son konuma git ve klonu yok et
-        if (activeClone != null)
+        else
         {
-            // Son frame'i uygula
-            PlayerFrame lastFrame = recordedFrames[recordedFrames.Count - 1];
-            activeClone.transform.position = lastFrame.position;
-            
-            if (cloneRenderer != null)
-            {
-                cloneRenderer.flipX = !lastFrame.facingRight;
-            }
-            
-            // Son kalan görüntü izlerini temizle
-            ClearAfterimages();
-            
-            yield return new WaitForSecondsRealtime(0.2f);
-            
-            Destroy(activeClone);
-            activeClone = null;
-            Debug.Log("Klon hareketleri tamamladı ve yok edildi!");
-            
-            // İşlem tamamlandı, zamanı ve oyuncu kontrolünü geri yükle
             RestoreTimeAndPlayerControl();
         }
     }
-    else
-    {
-        RestoreTimeAndPlayerControl();
-    }
-}
 
-// Zamanı ve oyuncu kontrolünü normale döndür
-private void RestoreTimeAndPlayerControl()
-{
-    if (purpleFilterPanel != null)
+    // Zamanı ve oyuncu kontrolünü normale döndür
+    private void RestoreTimeAndPlayerControl()
+    {
+        if (purpleFilterPanel != null)
         {
             purpleFilterPanel.SetActive(false);
         }
-    // Zamanı normale döndür
-    Time.timeScale = 1.0f;
-    
-    // Oyuncu hareketini tekrar etkinleştir
-    if (playerMovement != null)
-    {
-        playerMovement.enabled = true;
+        // Zamanı normale döndür
+        Time.timeScale = 1.0f;
+
+        // Oyuncu hareketini tekrar etkinleştir
+        if (playerMovement != null)
+        {
+            playerMovement.enabled = true;
+        }
     }
-}
-    
+
     // Klon görüntü izlerine yakınsa onları yok et
     private void CheckAndDestroyAfterimages()
     {
         float destroyDistance = 0.5f; // Yok etme mesafesi
         List<GameObject> imagesToRemove = new List<GameObject>();
-        
+
         foreach (GameObject afterimage in afterimages)
         {
             if (afterimage != null && activeClone != null)
@@ -396,67 +404,76 @@ private void RestoreTimeAndPlayerControl()
                 }
             }
         }
-        
+
         // İşaretlenen görüntü izlerini listeden çıkar
         foreach (GameObject imageToRemove in imagesToRemove)
         {
             afterimages.Remove(imageToRemove);
         }
     }
-    
+
     // Oyuncu respawn olduğunda klonu yok et
     public void OnPlayerRespawn()
-{
-    try
     {
-        // Kaydı durdur ve zamanı normale döndür
-        if (isRecording)
+        try
         {
-            isRecording = false;
+            // Kaydı durdur ve zamanı normale döndür
+            if (isRecording)
+            {
+                isRecording = false;
+                if (purpleFilterPanel != null)
+                    purpleFilterPanel.SetActive(false);
+
+                Time.timeScale = 1.0f;
+
+                // Oyuncu hareketini tekrar etkinleştir (eğer devre dışı bırakılmışsa)
+                if (playerMovement != null && !playerMovement.enabled)
+                {
+                    playerMovement.enabled = true;
+                }
+
+                Debug.Log("Kayıt sırasında ölüm: Kayıt durduruldu ve zaman normale döndü.");
+            }
+
+            // Klonu temizle
+            if (activeClone != null)
+            {
+                Destroy(activeClone);
+                activeClone = null;
+                Debug.Log("Respawn: Klon temizlendi.");
+            }
+
+            // Kayıtları temizle
+            recordedFrames.Clear();
+            ClearAfterimages();
+
+            // Respawn noktasını güncelle
+            if (respawnPoint != null)
+            {
+                // Oyun mekanikleri için respawn noktasını güncelle
+                if (useDefaultRespawnPoint && defaultRespawnPoint != null)
+                {
+                    respawnPoint.position = defaultRespawnPoint.position;
+                    Debug.Log("Respawn: Özel respawn noktası kullanıldı.");
+                }
+                else
+                {
+                    respawnPoint.position = initialRespawnPosition;
+                    Debug.Log("Respawn: Başlangıç respawn noktası kullanıldı.");
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("OnPlayerRespawn hata: " + e.Message);
+            // Temel güvenliği sağla
             Time.timeScale = 1.0f;
-            
-            // Oyuncu hareketini tekrar etkinleştir (eğer devre dışı bırakılmışsa)
-            if (playerMovement != null && !playerMovement.enabled)
-            {
-                playerMovement.enabled = true;
-            }
-            
-            Debug.Log("Kayıt sırasında ölüm: Kayıt durduruldu ve zaman normale döndü.");
-        }
-        
-        // Klonu temizle
-        if (activeClone != null)
-        {
-            Destroy(activeClone);
-            activeClone = null;
-            Debug.Log("Respawn: Klon temizlendi.");
-        }
-        
-        // Kayıtları temizle
-        recordedFrames.Clear();
-        ClearAfterimages();
-        
-        // Respawn noktasını güncelle
-        if (respawnPoint != null)
-        {
-            // Oyun mekanikleri için respawn noktasını güncelle
-            if (useDefaultRespawnPoint && defaultRespawnPoint != null)
-            {
-                respawnPoint.position = defaultRespawnPoint.position;
-                Debug.Log("Respawn: Özel respawn noktası kullanıldı.");
-            }
-            else
-            {
-                respawnPoint.position = initialRespawnPosition;
-                Debug.Log("Respawn: Başlangıç respawn noktası kullanıldı.");
-            }
         }
     }
-    catch (System.Exception e)
+    // Klon aktif mi kontrolü
+    public bool IsCloneActive()
     {
-        Debug.LogError("OnPlayerRespawn hata: " + e.Message);
-        // Temel güvenliği sağla
-        Time.timeScale = 1.0f;
+        return activeClone != null;
     }
-}
+
 }
