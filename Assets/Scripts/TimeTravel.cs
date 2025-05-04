@@ -102,7 +102,7 @@ public class TimeTravel : MonoBehaviour
         }
     }
 
-
+    public GameObject purpleFilterPanel; // Mor filtre paneli referansı
 
 
 
@@ -192,6 +192,11 @@ public class TimeTravel : MonoBehaviour
         lastRecordTime = Time.time;
         lastAfterimageTime = Time.time;
         
+        if (purpleFilterPanel != null)
+        {
+            purpleFilterPanel.SetActive(true);
+        }
+
         // Klonu oluştur
         activeClone = Instantiate(clonePrefab, transform.position, transform.rotation);
         
@@ -357,6 +362,10 @@ private IEnumerator PlaybackRecordedMovements()
 // Zamanı ve oyuncu kontrolünü normale döndür
 private void RestoreTimeAndPlayerControl()
 {
+    if (purpleFilterPanel != null)
+        {
+            purpleFilterPanel.SetActive(false);
+        }
     // Zamanı normale döndür
     Time.timeScale = 1.0f;
     
@@ -396,65 +405,58 @@ private void RestoreTimeAndPlayerControl()
     }
     
     // Oyuncu respawn olduğunda klonu yok et
-// Oyuncu respawn olduğunda klonu yok et
-// Oyuncu respawn olduğunda klonu yok et
-public void OnPlayerRespawn()
+    public void OnPlayerRespawn()
 {
-    // Kaydı durdur ve zamanı normale döndür
-    if (isRecording)
+    try
     {
-        isRecording = false;
-        Time.timeScale = 1.0f;
-        
-        // Oyuncu hareketini tekrar etkinleştir (eğer devre dışı bırakılmışsa)
-        if (playerMovement != null && !playerMovement.enabled)
+        // Kaydı durdur ve zamanı normale döndür
+        if (isRecording)
         {
-            playerMovement.enabled = true;
+            isRecording = false;
+            Time.timeScale = 1.0f;
+            
+            // Oyuncu hareketini tekrar etkinleştir (eğer devre dışı bırakılmışsa)
+            if (playerMovement != null && !playerMovement.enabled)
+            {
+                playerMovement.enabled = true;
+            }
+            
+            Debug.Log("Kayıt sırasında ölüm: Kayıt durduruldu ve zaman normale döndü.");
         }
         
-        Debug.Log("Kayıt sırasında ölüm: Kayıt durduruldu ve zaman normale döndü.");
-    }
-    
-    if (activeClone != null)
-    {
-        // Klon varsa, klonu yok et ve kaydı temizle
-        Destroy(activeClone);
-        activeClone = null;
+        // Klonu temizle
+        if (activeClone != null)
+        {
+            Destroy(activeClone);
+            activeClone = null;
+            Debug.Log("Respawn: Klon temizlendi.");
+        }
+        
+        // Kayıtları temizle
         recordedFrames.Clear();
         ClearAfterimages();
         
-        // Respawn noktası klonun olduğu yerde
-        respawnPoint.position = transform.position; // Klon ile güncellenmiş respawn pozisyonu
-    }
-    else
-    {
-        // Klon yoksa ve özel respawn noktası kullanılacaksa
-        if (useDefaultRespawnPoint && defaultRespawnPoint != null)
+        // Respawn noktasını güncelle
+        if (respawnPoint != null)
         {
-            // Oyuncuyu özel respawn noktasına ışınla
-            transform.position = defaultRespawnPoint.position;
-            
-            // Oyun mekanikleri için respawn noktasını da güncelle
-            if (respawnPoint != null)
+            // Oyun mekanikleri için respawn noktasını güncelle
+            if (useDefaultRespawnPoint && defaultRespawnPoint != null)
             {
                 respawnPoint.position = defaultRespawnPoint.position;
+                Debug.Log("Respawn: Özel respawn noktası kullanıldı.");
             }
-            
-            Debug.Log("Oyuncu özel respawn noktasına ışınlandı: " + defaultRespawnPoint.position);
-        }
-        else
-        {
-            // Özel respawn noktası kullanılmıyorsa başlangıç respawn pozisyonunu kullan
-            if (respawnPoint != null)
+            else
             {
                 respawnPoint.position = initialRespawnPosition;
-                transform.position = initialRespawnPosition; // Oyuncuyu da başlangıç pozisyonuna ışınla
-                Debug.Log("Oyuncu başlangıç respawn noktasına ışınlandı: " + initialRespawnPosition);
+                Debug.Log("Respawn: Başlangıç respawn noktası kullanıldı.");
             }
         }
     }
-    
-    // Tüm görüntü izlerini temizle (her durumda)
-    ClearAfterimages();
+    catch (System.Exception e)
+    {
+        Debug.LogError("OnPlayerRespawn hata: " + e.Message);
+        // Temel güvenliği sağla
+        Time.timeScale = 1.0f;
+    }
 }
 }
