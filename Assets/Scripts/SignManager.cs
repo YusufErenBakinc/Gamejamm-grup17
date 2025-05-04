@@ -8,14 +8,12 @@ public class SignManager : MonoBehaviour
 {
     [Header("Tabela Ayarları")]
     [SerializeField] private string signMessage = "Bu bir tabela mesajıdır!";
-    [SerializeField] private float displayDuration = 5f;
     
     [Header("UI Referansları")]
     [SerializeField] private GameObject messagePanel;
     [SerializeField] private TextMeshProUGUI messageText;
     
     private bool isDisplaying = false;
-    private float displayTimer = 0f;
 
     private void Start()
     {
@@ -24,26 +22,21 @@ public class SignManager : MonoBehaviour
             messagePanel.SetActive(false);
     }
 
-    private void Update()
-    {
-        // Eğer mesaj gösteriliyorsa süresini kontrol et
-        if (isDisplaying)
-        {
-            displayTimer -= Time.deltaTime;
-            
-            if (displayTimer <= 0)
-            {
-                HideMessage();
-            }
-        }
-    }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Eğer çarpışan nesne oyuncu ise ve henüz mesaj gösterilmiyorsa
-        if (collision.CompareTag("Player") && !isDisplaying)
+        // Eğer çarpışan nesne oyuncu ise
+        if (collision.CompareTag("Player"))
         {
             ShowMessage();
+        }
+    }
+    
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        // Eğer çıkış yapan nesne oyuncu ise
+        if (collision.CompareTag("Player"))
+        {
+            HideMessage();
         }
     }
     
@@ -57,8 +50,6 @@ public class SignManager : MonoBehaviour
             // Mesaj içeriğini ayarla
             messageText.text = signMessage;
             
-            // Zamanlayıcıyı başlat
-            displayTimer = displayDuration;
             isDisplaying = true;
         }
         else
