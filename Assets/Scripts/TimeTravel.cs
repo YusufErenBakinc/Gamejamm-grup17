@@ -164,7 +164,11 @@ public class TimeTravel : MonoBehaviour
                 StopRecordingAndPlayback();
             }
         }
-
+        // Q tuşuna basıldığında kaydı iptal et ve her şeyi temizle
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            CancelRecording(); // Kaydı iptal et
+        }
         // Kayıt modundayken belirli aralıklarla pozisyonu kaydet
         if (isRecording && Time.time - lastRecordTime > recordInterval)
         {
@@ -227,6 +231,39 @@ public class TimeTravel : MonoBehaviour
         }
         Time.timeScale = 0.5f;
         Debug.Log("Zaman klonu oluşturuldu ve kayıt başladı!");
+    }
+    private void CancelRecording()
+    {
+        if (isRecording)
+        {
+            // Kayıt sırasında her şeyi temizle
+            isRecording = false;
+            ClearAfterimages(); // Görüntü izlerini temizle
+
+            // Zamanı normale döndür
+            Time.timeScale = 1.0f;
+
+            // Klonu yok et
+            if (activeClone != null)
+            {
+                Destroy(activeClone);
+                activeClone = null;
+            }
+
+            // Mor filtreyi kapat
+            if (purpleFilterPanel != null)
+            {
+                purpleFilterPanel.SetActive(false);
+            }
+
+            // Oyuncunun hareketini tekrar etkinleştir
+            if (playerMovement != null)
+            {
+                playerMovement.enabled = true;
+            }
+
+            Debug.Log("Kayıt iptal edildi, her şey sıfırlandı.");
+        }
     }
 
     // Kayıt sırasında görüntü izi oluştur

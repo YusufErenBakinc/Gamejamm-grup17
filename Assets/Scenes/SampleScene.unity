@@ -9596,6 +9596,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: FallBox
       objectReference: {fileID: 0}
+    - target: {fileID: 6192478352589612572, guid: addcdc10eb8e8c546a7f7b2cd4321833, type: 3}
+      propertyPath: m_TagString
+      value: Hazard
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

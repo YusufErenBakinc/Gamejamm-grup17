@@ -23,7 +23,7 @@ public class PlayerRespawnHandler : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Hazard") || collision.CompareTag("FallZone"))
+        if (collision.CompareTag("Hazard"))
         {
             StartCoroutine(RespawnWithFade());
         }
