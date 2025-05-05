@@ -21,6 +21,11 @@ public class playerMovement : MonoBehaviour
     private bool isFacingRight;
 
     public Transform respawnPoint; // Respawn için hedef nokta
+
+    public AudioClip jumpSound;
+    public AudioClip damageSound;
+    public AudioClip footstepSound; // Yeni yürüme/koşma sesi değişkeni ekleyin
+    private AudioSource audioSource;
     private void Start()
     {
         isFacingRight = true;
@@ -28,8 +33,10 @@ public class playerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         respawnPoint = new GameObject("RespawnPoint").transform;
         respawnPoint.position = new Vector3(-5.57f, 1.35f, 0f);
-
         timeTravel = GetComponent<TimeTravel>();
+        
+        // Ses kaynağını al
+        audioSource = GetComponent<AudioSource>();
 
     }
 
@@ -45,6 +52,8 @@ public class playerMovement : MonoBehaviour
             {
                 rb.AddForce(new Vector2(rb.velocity.x, jump * 10));
                 hasDoubleJumped = false; // Yere basınca sıfırla
+                if (jumpSound != null && audioSource != null)
+                    audioSource.PlayOneShot(jumpSound);
             }
             else if (!hasDoubleJumped && timeTravel != null && timeTravel.IsCloneActive())
             {
@@ -52,6 +61,8 @@ public class playerMovement : MonoBehaviour
                 rb.AddForce(new Vector2(rb.velocity.x, jump * 10));
                 anim.SetTrigger("doubleJump");
                 hasDoubleJumped = true; // Double jump kullanıldı
+                if (jumpSound != null && audioSource != null)
+                    audioSource.PlayOneShot(jumpSound);
             }
         }
 
@@ -112,6 +123,9 @@ private void OnTriggerEnter2D(Collider2D other)
 {
     if (other.CompareTag("Hazard"))
     {
+        if (damageSound != null && audioSource != null)
+            audioSource.PlayOneShot(damageSound);
+
         if (timeTravel != null)
         {
             // Hazard'a çarptığımızda, respawn işlemi için TimeTravel scriptini kullan
@@ -124,6 +138,15 @@ private void OnTriggerEnter2D(Collider2D other)
         }
         
         rb.velocity = Vector2.zero; // Hız sıfırlama
+    }
+}
+
+public void PlayFootstepSound()
+{
+    // Oyuncu gerçekten hareket ediyorsa ve yerdeyse ses çal
+    if (grounded && footstepSound != null && audioSource != null && Mathf.Abs(Move) > 0.1f)
+    {
+        audioSource.PlayOneShot(footstepSound, 6f);
     }
 }
 

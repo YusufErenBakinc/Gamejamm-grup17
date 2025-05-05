@@ -22,7 +22,10 @@ public class TimeTravel : MonoBehaviour
 
     public GameObject purpleFilterPanel; // Mor filtre paneli referansı
 
-
+    [Header("Audio Settings")]
+    [SerializeField] private AudioClip recordStartSound;
+    [SerializeField] private AudioClip recordStopSound;
+    private AudioSource audioSource;
 
     [Header("Respawn Settings")]
     public Transform defaultRespawnPoint; // Inspector'dan ayarlanacak özel respawn noktası
@@ -58,6 +61,12 @@ public class TimeTravel : MonoBehaviour
         // Komponentleri al
         playerMovement = GetComponent<playerMovement>();
 
+        // AudioSource component'ini al veya oluştur
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
         // respawnPoint referansını playerMovement'tan al
         if (playerMovement != null)
         {
@@ -127,6 +136,11 @@ public class TimeTravel : MonoBehaviour
         lastAfterimageTime = Time.time;
         recordedStartPosition = transform.position;
 
+        // Kayıt başlatma sesini çal
+        if (audioSource != null && recordStartSound != null)
+        {
+            audioSource.PlayOneShot(recordStartSound);
+        }
 
         if (purpleFilterPanel != null)
         {
@@ -246,7 +260,12 @@ public class TimeTravel : MonoBehaviour
         finalPosition = transform.position;
         transform.position = recordedStartPosition;
 
-
+        // Kayıt durdurma sesini çal - timeScale 0 olacağından ignoreListenerPause kullan
+        if (audioSource != null && recordStopSound != null)
+        {
+            audioSource.ignoreListenerPause = true;
+            audioSource.PlayOneShot(recordStopSound);
+        }
         // Zamanı tamamen durdur
         Time.timeScale = 0f;
 
@@ -338,8 +357,14 @@ public class TimeTravel : MonoBehaviour
         {
             purpleFilterPanel.SetActive(false);
         }
+        // Audio ayarını geri al
+        if (audioSource != null)
+        {
+            audioSource.ignoreListenerPause = false;
+        }
         // Zamanı normale döndür
         Time.timeScale = 1.0f;
+
 
         // Oyuncu hareketini tekrar etkinleştir
         if (playerMovement != null)
@@ -446,6 +471,11 @@ public void OnPlayerRespawn()
 // Klonu oyuncuya getirme sekansını başlat
 private void StartCloneReturnSequence()
 {
+        // Kayıt durdurma sesini çal
+    if (audioSource != null && recordStopSound != null)
+    {
+        audioSource.PlayOneShot(recordStopSound);
+    }
     // Zamanı durdur
     Time.timeScale = 0f;
     

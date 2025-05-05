@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -18,6 +19,7 @@ public class GameControl : MonoBehaviour
         {
             Debug.Log("Exiting the game...");
             Application.Quit(); // Oyundan çıkış
+            EditorApplication.isPlaying = false; // Editörde çıkış yap
         }
 
         if (Input.GetKeyDown(KeyCode.R))
