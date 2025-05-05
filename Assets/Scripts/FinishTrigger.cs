@@ -56,6 +56,7 @@ public class FinishTrigger : MonoBehaviour
                     if (gameControl != null)
                     {
                         gameControl.enabled = true;
+                        movement.enabled = true;
                     }
                 }
             }
