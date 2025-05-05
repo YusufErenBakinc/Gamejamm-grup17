@@ -92,13 +92,12 @@ public class playerMovement : MonoBehaviour
         {
             Vector3 normal = other.GetContact(0).normal;
 
-            // E�er normal yukar�ya yak�nsa (�rn. en az %90 yukar� bak�yorsa)
-            if (Vector3.Angle(normal, Vector3.up) < 45f)
+            // Yalnızca yukarı doğru olan yüzeyler için grounded = true
+            if (normal.y > 0.7f && Mathf.Abs(normal.x) < 0.5f) // Yatay yüzeyleri hariç tut
             {
                 grounded = true;
             }
         }
-
     }
 
     private void OnCollisionExit2D(Collision2D other)
@@ -109,12 +108,23 @@ public class playerMovement : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+private void OnTriggerEnter2D(Collider2D other)
+{
+    if (other.CompareTag("Hazard"))
     {
-        if (other.CompareTag("Hazard"))
+        if (timeTravel != null)
         {
-            transform.position = respawnPoint.position;
-            rb.velocity = Vector2.zero; // Hız sıfırlama (opsiyonel)
+            // Hazard'a çarptığımızda, respawn işlemi için TimeTravel scriptini kullan
+            timeTravel.OnPlayerRespawn();
         }
+        else
+        {
+            // TimeTravel yoksa normal respawn noktasını kullan
+            transform.position = respawnPoint.position;
+        }
+        
+        rb.velocity = Vector2.zero; // Hız sıfırlama
     }
+}
+
 }

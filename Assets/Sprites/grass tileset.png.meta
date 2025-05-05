@@ -139,8 +139,8 @@ TextureImporter:
       name: grass tileset_0
       rect:
         serializedVersion: 2
-        x: 128
-        y: 112
+        x: 288
+        y: 93
         width: 16
         height: 16
       alignment: 0
@@ -2353,7 +2353,12 @@ TextureImporter:
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-      physicsShape: []
+      physicsShape:
+      - - {x: -8, y: 8}
+        - {x: -8, y: -8}
+        - {x: 8, y: -8}
+        - {x: 8, y: 0}
+        - {x: -2, y: 5}
       tessellationDetail: 0
       bones: []
       spriteID: c9927b62e644d3d4ca9f41b0be418025
@@ -2374,7 +2379,12 @@ TextureImporter:
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-      physicsShape: []
+      physicsShape:
+      - - {x: -8, y: 0}
+        - {x: -8, y: -8}
+        - {x: 8, y: -8}
+        - {x: 8, y: -8}
+        - {x: -6, y: -1}
       tessellationDetail: 0
       bones: []
       spriteID: b39f500af5fe4834d9813010d480912b
@@ -2395,7 +2405,12 @@ TextureImporter:
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-      physicsShape: []
+      physicsShape:
+      - - {x: -6, y: -7}
+        - {x: -8, y: -8}
+        - {x: 8, y: -8}
+        - {x: 8, y: 0}
+        - {x: 6, y: -1}
       tessellationDetail: 0
       bones: []
       spriteID: 6ae1f345bf8e5bb489ec0d0942764085
@@ -2416,7 +2431,12 @@ TextureImporter:
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-      physicsShape: []
+      physicsShape:
+      - - {x: 2, y: 5}
+        - {x: -8, y: 0}
+        - {x: -8, y: -8}
+        - {x: 8, y: -8}
+        - {x: 8, y: 8}
       tessellationDetail: 0
       bones: []
       spriteID: 18d6d27db4148ee4f8236e3ad8272c6f

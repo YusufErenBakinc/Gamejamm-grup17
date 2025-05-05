@@ -21,6 +21,7 @@ public class PlayerRespawnHandler : MonoBehaviour
         }
     }
 
+    
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Hazard"))
@@ -28,54 +29,51 @@ public class PlayerRespawnHandler : MonoBehaviour
             StartCoroutine(RespawnWithFade());
         }
     }
+    
 
     public IEnumerator RespawnWithFade()
+{
+    // Hareketi kapat
+    if (playerMovement != null)
+        playerMovement.enabled = false;
+
+    // Ekran tamamen karanlık olduğundan emin olmak için
+    Color c = screenFader.color;
+    c.a = 1f;
+    screenFader.color = c;
+    
+    // Karanlıkta bir süre bekle
+    yield return new WaitForSeconds(0.1f);
+    
+    // TimeTravel'daki respawn mantığını çağır - oyuncuyu ışınlamadan önce
+    if (timeTravel != null)
     {
-        // Hareketi kapat
-        if (playerMovement != null)
-            playerMovement.enabled = false;
-
-        // Ekran tamamen karanlık olduğundan emin olmak için
-        Color c = screenFader.color;
-        c.a = 1f;
-        screenFader.color = c;
-        
-        // Karanlıkta bir süre bekle
-        yield return new WaitForSeconds(0.1f);
-
-        // Her respawn sırasında güncel respawn noktasını alalım
-        if (playerMovement != null)
-        {
-            respawnPoint = playerMovement.respawnPoint;
-        }
-
-        // Karanlıktayken oyuncuyu ışınla
-        transform.position = respawnPoint.position;
-
-        // Zaman klonunu yok et (eğer TimeTravel scripti varsa)
-        if (timeTravel != null)
-        {
-            timeTravel.OnPlayerRespawn();
-        }
-
-        // Oyuncu ışınlandıktan sonra kısa bir bekleme
-        yield return new WaitForSeconds(0.2f);
-
-        // Ekranı aydınlat
-        yield return StartCoroutine(FadeScreen(1f, 0f));
-
-        // Ekran tamamen aydınlandığından emin ol
-        c = screenFader.color;
-        c.a = 0f;
-        screenFader.color = c;
-
-        // Hareketi açmadan önce kısa bir bekleme (isteğe bağlı)
-        yield return new WaitForSeconds(0.1f);
-
-        // Hareketi aç
-        if (playerMovement != null)
-            playerMovement.enabled = true;
+        timeTravel.OnPlayerRespawn();
     }
+    else if (playerMovement != null && playerMovement.respawnPoint != null)
+    {
+        // TimeTravel yoksa normal respawn noktasını kullan
+        transform.position = playerMovement.respawnPoint.position;
+    }
+
+    // Oyuncu ışınlandıktan sonra kısa bir bekleme
+    yield return new WaitForSeconds(0.2f);
+
+    // Ekranı aydınlat
+    yield return StartCoroutine(FadeScreen(1f, 0f));
+
+    // Ekran tamamen aydınlandığından emin ol
+    c = screenFader.color;
+    c.a = 0f;
+    screenFader.color = c;
+
+    // Hareketi açmadan önce kısa bir bekleme (isteğe bağlı)
+    yield return new WaitForSeconds(0.1f);
+
+    // Hareketi aç
+    if (playerMovement != null)
+        playerMovement.enabled = true;
+}
 
     private IEnumerator FadeScreen(float from, float to)
     {
